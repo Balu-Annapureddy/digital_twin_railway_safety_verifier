@@ -1,0 +1,6 @@
+train_id,source_station,destination_station,scheduled_arrival,average_speed,train_type,initial_distance
+T001,Mumbai Central,Pune Junction,14:30,85,STOPPING,12.5
+T002,Delhi,Agra Cantt,15:45,95,STOPPING,18.0
+T003,Chennai Central,Bangalore City,16:20,75,NON_STOPPING,8.5
+T004,Kolkata,Howrah,17:00,80,STOPPING,15.2
+T005,Hyderabad,Secunderabad,18:15,70,STOPPING,6.8

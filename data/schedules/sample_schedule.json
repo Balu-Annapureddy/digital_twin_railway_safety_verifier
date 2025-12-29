@@ -1,0 +1,49 @@
+{
+  "schedules": [
+    {
+      "train_id": "T001",
+      "source_station": "Mumbai Central",
+      "destination_station": "Pune Junction",
+      "scheduled_arrival": "14:30",
+      "average_speed": 85,
+      "train_type": "STOPPING",
+      "initial_distance": 12.5
+    },
+    {
+      "train_id": "T002",
+      "source_station": "Delhi",
+      "destination_station": "Agra Cantt",
+      "scheduled_arrival": "15:45",
+      "average_speed": 95,
+      "train_type": "STOPPING",
+      "initial_distance": 18.0
+    },
+    {
+      "train_id": "T003",
+      "source_station": "Chennai Central",
+      "destination_station": "Bangalore City",
+      "scheduled_arrival": "16:20",
+      "average_speed": 75,
+      "train_type": "NON_STOPPING",
+      "initial_distance": 8.5
+    },
+    {
+      "train_id": "T004",
+      "source_station": "Kolkata",
+      "destination_station": "Howrah",
+      "scheduled_arrival": "17:00",
+      "average_speed": 80,
+      "train_type": "STOPPING",
+      "initial_distance": 15.2
+    },
+    {
+      "train_id": "T005",
+      "source_station": "Hyderabad",
+      "destination_station": "Secunderabad",
+      "scheduled_arrival": "18:15",
+      "average_speed": 70,
+      "train_type": "STOPPING",
+      "initial_distance": 6.8
+    }
+  ]
+}

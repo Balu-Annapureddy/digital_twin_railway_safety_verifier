@@ -1,9 +1,12 @@
-# Railway Digital Twin System - Final Project Documentation
+# Railway Digital Twin System - Complete Documentation
 
 ## Project Overview
 **AI-Driven Digital Twin–Based Real-Time Railway Interlock and Signal Logic Verifier**
 
 A software-first, simulation-based academic project that demonstrates safety-critical system design using Digital Twin architecture for railway operations.
+
+### 🎉 Enhanced Version
+This system now includes **real-world features** with enhanced UI/UX while maintaining 100% safety compliance.
 
 ## System Architecture
 
@@ -42,6 +45,38 @@ A software-first, simulation-based academic project that demonstrates safety-cri
    - Real-time monitoring
    - Manual controls
    - Event logging and audit trail
+
+### Enhanced Features (New)
+
+7. **Real-World Data Integration** (`src/data/`)
+   - Load train schedules from CSV/JSON files
+   - Data validation and fallback to simulation
+   - Sample realistic Indian railway data
+   - Seamless integration with existing system
+
+8. **Enhanced Station Dashboard**
+   - **Station Overview Panel**: Real-time platform statistics
+   - **Train Overview Panel**: Categorized trains (Incoming/On Platform/Departed)
+   - **Platform Details Panel**: Color-coded platform cards
+   - **Custom CSS Styling**: Professional gradient headers and improved UX
+
+9. **Train Categorization** (`src/utils/train_categorizer.py`)
+   - Automatic categorization by operational status
+   - Visual status indicators with emojis
+   - Tabbed interface for easy navigation
+
+10. **2D Visual Simulation** (`dashboard/components/visual_sim.py`)
+    - Interactive Plotly-based schematic view
+    - Real-time train position tracking
+    - Color-coded platform tracks
+    - Signal and gate indicators
+    - Station boundary visualization
+
+11. **Comprehensive Documentation**
+    - Complete user guide (`docs/USER_GUIDE.md`)
+    - Detailed component explanations
+    - Step-by-step workflows
+    - Troubleshooting guide
 
 ## Safety Rules
 
