@@ -113,21 +113,30 @@ This system now includes **real-world features** with enhanced UI/UX while maint
 ```
 Digital Twin–Based Railway/
 ├── config/                 # Configuration and safety rules
+│   ├── settings.py
+│   ├── safety_rules.py
+│   └── station_config.py  # NEW: Station metadata
 ├── src/
 │   ├── simulation/        # Train simulation
 │   ├── ai/                # ETA prediction
 │   ├── railway/           # Track, signal, gate controllers
 │   ├── digital_twin/      # Safety verifier (CORE)
 │   ├── logging/           # Event logging
-│   └── utils/             # Utilities
+│   ├── data/              # NEW: Real-world data integration
+│   └── utils/             # Utilities (includes train_categorizer)
 ├── dashboard/             # Streamlit dashboard
+│   ├── app.py             # Enhanced with new panels
+│   └── components/        # NEW: Visual simulation component
 ├── data/
 │   ├── models/            # Trained ML models
 │   ├── logs/              # Event logs
-│   └── datasets/          # Training data
+│   ├── datasets/          # Training data
+│   └── schedules/         # NEW: Sample schedule files (CSV/JSON)
 ├── tests/                 # Unit tests
-├── examples/              # Demo scripts
+├── examples/              # Demo scripts (includes schedule loader demo)
 ├── docs/                  # Documentation
+│   ├── development_log.md
+│   └── USER_GUIDE.md      # NEW: Comprehensive user guide
 └── requirements.txt       # Dependencies
 ```
 
@@ -166,28 +175,58 @@ streamlit run dashboard/app.py
 
 ## Key Features
 
-### 1. Software-Only Simulation
+### Core System
+
+#### 1. Software-Only Simulation
 - No hardware dependencies
 - Fully deterministic
 - Repeatable scenarios
 
-### 2. Explainable AI
+#### 2. Explainable AI
 - Linear Regression (baseline)
 - Random Forest (primary)
 - Feature importance analysis
 - Confidence scoring
 
-### 3. Digital Twin Architecture
+#### 3. Digital Twin Architecture
 - Virtual replica of entire system
 - Decision simulation before execution
 - Safety rule enforcement
 - Conflict detection
 
-### 4. Human-in-the-Loop
+#### 4. Human-in-the-Loop
 - Station Master dashboard
 - Manual override capability
 - Complete audit trail
 - Emergency controls
+
+### Enhanced Features
+
+#### 5. Real-World Data Integration
+- CSV/JSON schedule loading
+- Data validation and fallback
+- Realistic Indian railway samples
+- Seamless data layer integration
+
+#### 6. Station-Level Awareness
+- Station overview with real-time metrics
+- Platform occupancy statistics
+- Train categorization (Incoming/On Platform/Departed)
+- Enhanced visual indicators
+
+#### 7. 2D Visual Simulation
+- Interactive schematic station layout
+- Real-time train position tracking
+- Color-coded platform states
+- Signal and gate visualization
+- Hover tooltips with detailed information
+
+#### 8. Professional UI/UX
+- Gradient station headers
+- Color-coded status cards
+- Tabbed interfaces
+- Custom CSS styling
+- Responsive layout
 
 ## Academic Evaluation Criteria
 
@@ -210,9 +249,28 @@ streamlit run dashboard/app.py
 - Comprehensive tests
 - Review-ready structure
 
-## Development Log
+## Documentation
 
-See `docs/development_log.md` for complete development history with timestamps and detailed progress tracking.
+### Available Documentation
+
+1. **User Guide** (`docs/USER_GUIDE.md`)
+   - Complete dashboard walkthrough
+   - Component explanations
+   - Step-by-step workflows
+   - Troubleshooting guide
+   - Best practices for demonstrations
+
+2. **Development Log** (`docs/development_log.md`)
+   - Complete development history
+   - Timestamped progress tracking
+   - Enhancement phases documented
+   - Safety compliance notes
+
+3. **README** (this file)
+   - Project overview
+   - Setup instructions
+   - Feature list
+   - Architecture overview
 
 ## Future Enhancements (Out of Scope)
 
