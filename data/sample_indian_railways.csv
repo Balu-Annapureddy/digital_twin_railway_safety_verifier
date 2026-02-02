@@ -1,0 +1,21 @@
+train_id,departure_station,arrival_station,scheduled_time,actual_time,status,speed,distance_km
+T001,Mumbai Central,Pune Junction,08:00,08:05,DELAYED,85,150
+T001,Pune Junction,Solapur,10:30,10:30,ON_TIME,90,250
+T001,Solapur,Hyderabad,14:00,13:55,ON_TIME,95,380
+T002,Delhi,Agra,06:00,06:00,ON_TIME,110,200
+T002,Agra,Jhansi,08:30,08:35,DELAYED,105,230
+T002,Jhansi,Bhopal,12:00,12:10,DELAYED,100,310
+T003,Chennai Central,Bangalore,07:00,07:00,ON_TIME,80,350
+T003,Bangalore,Mysore,10:00,10:05,DELAYED,75,140
+T004,Kolkata,Bhubaneswar,09:00,09:00,ON_TIME,95,440
+T004,Bhubaneswar,Visakhapatnam,13:30,13:25,ON_TIME,100,450
+T005,Ahmedabad,Vadodara,10:00,10:00,ON_TIME,110,100
+T005,Vadodara,Surat,11:30,11:35,DELAYED,105,130
+T005,Surat,Mumbai,14:00,14:10,DELAYED,100,260
+T006,Jaipur,Ajmer,08:00,08:00,ON_TIME,90,135
+T006,Ajmer,Udaipur,11:00,11:05,DELAYED,85,185
+T007,Lucknow,Kanpur,09:00,09:00,ON_TIME,100,80
+T007,Kanpur,Allahabad,11:00,11:00,ON_TIME,95,200
+T007,Allahabad,Varanasi,14:00,14:05,DELAYED,90,120
+T008,Patna,Gaya,10:00,10:00,ON_TIME,85,100
+T008,Gaya,Ranchi,13:00,13:10,DELAYED,80,220

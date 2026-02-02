@@ -1,0 +1,111 @@
+{
+  "network_name": "Indian Railway Network - Sample",
+  "stations": [
+    {
+      "station_id": "S001",
+      "station_name": "Mumbai Central",
+      "latitude": 19.0760,
+      "longitude": 72.8777,
+      "platforms": 12,
+      "zone": "Western Railway"
+    },
+    {
+      "station_id": "S002",
+      "station_name": "Delhi Junction",
+      "latitude": 28.6139,
+      "longitude": 77.2090,
+      "platforms": 16,
+      "zone": "Northern Railway"
+    },
+    {
+      "station_id": "S003",
+      "station_name": "Chennai Central",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "platforms": 12,
+      "zone": "Southern Railway"
+    },
+    {
+      "station_id": "S004",
+      "station_name": "Kolkata Howrah",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "platforms": 23,
+      "zone": "Eastern Railway"
+    },
+    {
+      "station_id": "S005",
+      "station_name": "Bangalore City",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "platforms": 10,
+      "zone": "South Western Railway"
+    },
+    {
+      "station_id": "S006",
+      "station_name": "Hyderabad Deccan",
+      "latitude": 17.3850,
+      "longitude": 78.4867,
+      "platforms": 8,
+      "zone": "South Central Railway"
+    },
+    {
+      "station_id": "S007",
+      "station_name": "Pune Junction",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "platforms": 6,
+      "zone": "Central Railway"
+    },
+    {
+      "station_id": "S008",
+      "station_name": "Ahmedabad Junction",
+      "latitude": 23.0225,
+      "longitude": 72.5714,
+      "platforms": 12,
+      "zone": "Western Railway"
+    }
+  ],
+  "routes": [
+    {
+      "route_id": "R001",
+      "from_station": "S001",
+      "to_station": "S007",
+      "distance_km": 150,
+      "line_name": "Mumbai-Pune Express",
+      "average_time_hours": 3.5
+    },
+    {
+      "route_id": "R002",
+      "from_station": "S007",
+      "to_station": "S006",
+      "distance_km": 560,
+      "line_name": "Pune-Hyderabad Line",
+      "average_time_hours": 12
+    },
+    {
+      "route_id": "R003",
+      "from_station": "S003",
+      "to_station": "S005",
+      "distance_km": 350,
+      "line_name": "Chennai-Bangalore Mail",
+      "average_time_hours": 6
+    },
+    {
+      "route_id": "R004",
+      "from_station": "S002",
+      "to_station": "S004",
+      "distance_km": 1450,
+      "line_name": "Rajdhani Express",
+      "average_time_hours": 17
+    },
+    {
+      "route_id": "R005",
+      "from_station": "S001",
+      "to_station": "S008",
+      "distance_km": 490,
+      "line_name": "Mumbai-Ahmedabad Shatabdi",
+      "average_time_hours": 7
+    }
+  ]
+}
