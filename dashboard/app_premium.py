@@ -19,6 +19,111 @@ from src.intelligence.dataset_analyzer import SmartDatasetAnalyzer
 from src.intelligence.data_transformer import DataTransformer
 from src.network.network_builder import NetworkBuilder
 
+
+# ============================================================================
+# HELPER FUNCTIONS - Define before use
+# ============================================================================
+
+def create_network_visualization(network_builder):
+    """Create interactive network visualization using Plotly."""
+    graph = network_builder.graph
+    layout = network_builder.layout
+    
+    # Create edge traces
+    edge_trace = []
+    for edge in graph.edges():
+        x0, y0 = layout[edge[0]]
+        x1, y1 = layout[edge[1]]
+        
+        edge_trace.append(go.Scatter(
+            x=[x0, x1, None],
+            y=[y0, y1, None],
+            mode='lines',
+            line=dict(width=2, color='#4ecdc4'),
+            hoverinfo='none',
+            showlegend=False
+        ))
+    
+    # Create node trace
+    node_x = []
+    node_y = []
+    node_text = []
+    
+    for node in graph.nodes():
+        x, y = layout[node]
+        node_x.append(x)
+        node_y.append(y)
+        station_info = network_builder.get_station_info(node)
+        node_text.append(f"{station_info['name']}<br>Connections: {station_info['degree']}")
+    
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers+text',
+        hoverinfo='text',
+        text=[network_builder.stations[n].name for n in graph.nodes()],
+        textposition="top center",
+        hovertext=node_text,
+        marker=dict(
+            size=20,
+            color='#00ff88',
+            line=dict(width=2, color='#ffffff')
+        ),
+        showlegend=False
+    )
+    
+    # Create figure
+    fig = go.Figure(data=edge_trace + [node_trace])
+    
+    fig.update_layout(
+        title="Railway Network Map",
+        showlegend=False,
+        hovermode='closest',
+        template="plotly_dark",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        height=600,
+        plot_bgcolor='#0a0e1a',
+        paper_bgcolor='#0a0e1a'
+    )
+    
+    return fig
+
+
+def create_circular_gauge(value, title, color):
+    """Create circular gauge chart."""
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=value,
+        title={'text': title, 'font': {'size': 14, 'color': '#e0e0e0'}},
+        number={'suffix': "%", 'font': {'size': 24, 'color': color}},
+        gauge={
+            'axis': {'range': [0, 100], 'tickcolor': '#4a5568'},
+            'bar': {'color': color},
+            'bgcolor': '#1a1f2e',
+            'borderwidth': 2,
+            'bordercolor': '#2a3f5f',
+            'steps': [
+                {'range': [0, 50], 'color': '#2d3748'},
+                {'range': [50, 75], 'color': '#1a202c'},
+                {'range': [75, 100], 'color': '#0f1419'}
+            ],
+        }
+    ))
+    
+    fig.update_layout(
+        height=200,
+        margin=dict(l=10, r=10, t=40, b=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font={'color': '#e0e0e0'}
+    )
+    
+    return fig
+
+# ============================================================================
+# END HELPER FUNCTIONS
+# ============================================================================
+
 # Page configuration
 st.set_page_config(
     page_title="Railway Digital Twin Control Center",
@@ -457,104 +562,6 @@ elif page == "⏱️ Time-Traveler":
         
         # Timeline slider
         st.slider("Timeline", 0, 100, 50)
-
-
-def create_network_visualization(network_builder):
-    """Create interactive network visualization using Plotly."""
-    graph = network_builder.graph
-    layout = network_builder.layout
-    
-    # Create edge traces
-    edge_trace = []
-    for edge in graph.edges():
-        x0, y0 = layout[edge[0]]
-        x1, y1 = layout[edge[1]]
-        
-        edge_trace.append(go.Scatter(
-            x=[x0, x1, None],
-            y=[y0, y1, None],
-            mode='lines',
-            line=dict(width=2, color='#4ecdc4'),
-            hoverinfo='none',
-            showlegend=False
-        ))
-    
-    # Create node trace
-    node_x = []
-    node_y = []
-    node_text = []
-    
-    for node in graph.nodes():
-        x, y = layout[node]
-        node_x.append(x)
-        node_y.append(y)
-        station_info = network_builder.get_station_info(node)
-        node_text.append(f"{station_info['name']}<br>Connections: {station_info['degree']}")
-    
-    node_trace = go.Scatter(
-        x=node_x, y=node_y,
-        mode='markers+text',
-        hoverinfo='text',
-        text=[network_builder.stations[n].name for n in graph.nodes()],
-        textposition="top center",
-        hovertext=node_text,
-        marker=dict(
-            size=20,
-            color='#00ff88',
-            line=dict(width=2, color='#ffffff')
-        ),
-        showlegend=False
-    )
-    
-    # Create figure
-    fig = go.Figure(data=edge_trace + [node_trace])
-    
-    fig.update_layout(
-        title="Railway Network Map",
-        showlegend=False,
-        hovermode='closest',
-        template="plotly_dark",
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        height=600,
-        plot_bgcolor='#0a0e1a',
-        paper_bgcolor='#0a0e1a'
-    )
-    
-    return fig
-
-
-def create_circular_gauge(value, title, color):
-    """Create circular gauge chart."""
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=value,
-        title={'text': title, 'font': {'size': 14, 'color': '#e0e0e0'}},
-        number={'suffix': "%", 'font': {'size': 24, 'color': color}},
-        gauge={
-            'axis': {'range': [0, 100], 'tickcolor': '#4a5568'},
-            'bar': {'color': color},
-            'bgcolor': '#1a1f2e',
-            'borderwidth': 2,
-            'bordercolor': '#2a3f5f',
-            'steps': [
-                {'range': [0, 50], 'color': '#2d3748'},
-                {'range': [50, 75], 'color': '#1a202c'},
-                {'range': [75, 100], 'color': '#0f1419'}
-            ],
-        }
-    ))
-    
-    fig.update_layout(
-        height=200,
-        margin=dict(l=10, r=10, t=40, b=10),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font={'color': '#e0e0e0'}
-    )
-    
-    return fig
-
 
 if __name__ == "__main__":
     pass
