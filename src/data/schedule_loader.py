@@ -168,6 +168,73 @@ class ScheduleLoader:
                 return schedule
         return None
     
+    def get_station_stops(self, station_name: str) -> List[Dict]:
+        """
+        Get all schedule entries involving a specific station.
+        
+        Args:
+            station_name: Station name to filter by
+            
+        Returns:
+            List of schedule dictionaries
+        """
+        stops = []
+        for schedule in self.schedules:
+            if (schedule.get('departure_station') == station_name or 
+                schedule.get('arrival_station') == station_name):
+                stops.append(schedule)
+        return stops
+    
+    def get_trains_at_station_time(self, station_name: str, time_str: str) -> List[str]:
+        """
+        Get trains at a station at a specific time (simplified).
+        
+        Args:
+            station_name: Station name
+            time_str: Time in HH:MM format
+            
+        Returns:
+            List of train IDs
+        """
+        # This is a simplified version - actual implementation would need
+        # proper time parsing and comparison
+        trains = []
+        stops = self.get_station_stops(station_name)
+        
+        for stop in stops:
+            # Check if train is at station around this time
+            scheduled = stop.get('scheduled_time', '')
+            actual = stop.get('actual_time', '')
+            
+            if time_str in scheduled or time_str in actual:
+                train_id = stop.get('train_id')
+                if train_id and train_id not in trains:
+                    trains.append(train_id)
+        
+        return trains
+    
+    def get_time_range(self) -> tuple:
+        """
+        Get the time range covered by schedules.
+        
+        Returns:
+            Tuple of (min_time_str, max_time_str)
+        """
+        times = []
+        
+        for schedule in self.schedules:
+            scheduled = schedule.get('scheduled_time')
+            actual = schedule.get('actual_time')
+            
+            if scheduled:
+                times.append(scheduled)
+            if actual:
+                times.append(actual)
+        
+        if times:
+            return min(times), max(times)
+        return None, None
+    
     def validate_schedule(self, schedule: Dict) -> bool:
         """
         Validate a single schedule entry.

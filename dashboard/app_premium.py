@@ -372,6 +372,10 @@ elif page == "📊 Upload Data":
                 unified = transformer.transform()
                 st.session_state.unified_model = unified
                 
+                # PERSIST RAW DATAFRAME FOR CALCULATOR
+                st.session_state.raw_df = df
+                
+                
                 # Build network
                 builder = NetworkBuilder(unified)
                 graph = builder.build_topology()
@@ -537,31 +541,195 @@ elif page == "📈 Analytics":
         
         st.plotly_chart(fig_trend, use_container_width=True)
 
-elif page == "⏱️ Time-Traveler":
-    st.title("⏱️ Historical Replay")
+    # ============================================================================
+    # TIME TRAVELER / HISTORICAL REPLAY LOGIC
+    # ============================================================================
+    
+    st.title("⏱️ Time-Traveler & Historical Replay")
     
     if not st.session_state.dataset_loaded:
-        st.warning("⚠️ Please upload a dataset first")
+        st.warning("⚠️ Please upload a dataset to enable Time-Traveler features.")
+        st.info("Tip: Upload a CSV with schedule data to visualize track occupancy over time.")
     else:
-        st.info("🚧 Time-Traveler feature coming soon! This will allow you to replay historical operations.")
+        # Initialize Backend Components if not already done
+        if 'track_calculator' not in st.session_state:
+            with st.spinner("Initializing Historical Engine..."):
+                try:
+                    from src.railway.station_manager import StationManager
+                    from src.utils.track_occupancy_calculator import TrackOccupancyCalculator
+                    
+                    # 1. Initialize Station Manager (Topology)
+                    # Try to look for topology file in standard location
+                    topo_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'sample_network_topology.json')
+                    if os.path.exists(topo_path):
+                        st.session_state.station_manager = StationManager(topology_file=topo_path)
+                    else:
+                        st.warning("Topology file not found. Using default 3-platform config.")
+                        st.session_state.station_manager = StationManager(network_topology={'stations': []}) # fallback or need better default
+                    
+                    # 2. Initialize Track Calculator (Schedule)
+                    # We use the dataframe that was uploaded/analyzed
+                    # Need to retrieve the dataframe from the analyzer result if stored, 
+                    # OR we just re-use the df if we kept it. 
+                    # NOTE: app_premium.py current state doesn't persist the raw df in session_state explicitly 
+                    # outside the local scope of "Upload Data". 
+                    # We should probably persist it in "Upload Data" section.
+                    # For now, let's assume we can't get it unless we re-upload or if we modified Upload section to save it.
+                    # Let's Modify the Upload Section to save `st.session_state.raw_df` first.
+                    
+                    # WAIT: I cannot modify the Upload Section in this replace_block easily without replacing the whole file 
+                    # or doing a multi_replace.
+                    # Let's assume for this block that st.session_state.raw_df EXISTS. 
+                    # If not, we show an error asking to re-upload.
+                    
+                    if 'raw_df' in st.session_state:
+                         st.session_state.track_calculator = TrackOccupancyCalculator(
+                            st.session_state.raw_df, 
+                            st.session_state.station_manager.topology
+                        )
+                    else:
+                        st.error("Dataframe not found in memory. Please re-upload the dataset.")
+                
+                except Exception as e:
+                    st.error(f"Failed to initialize engine: {e}")
         
-        # Timeline controls mockup
-        st.markdown("### 🎮 Playback Controls")
-        col1, col2, col3, col4, col5 = st.columns(5)
+        # --- UI CONTROLS ---
         
-        with col1:
-            st.button("⏮️ Start")
-        with col2:
-            st.button("⏪ Rewind")
-        with col3:
-            st.button("⏯️ Play/Pause")
-        with col4:
-            st.button("⏩ Forward")
-        with col5:
-            st.button("⏭️ End")
-        
-        # Timeline slider
-        st.slider("Timeline", 0, 100, 50)
+        if 'track_calculator' in st.session_state:
+            calc = st.session_state.track_calculator
+            mgr = st.session_state.station_manager
+            
+            # 1. Station Selector
+            st.markdown("### 1. Select Station")
+            station_names = mgr.get_station_names()
+            if not station_names:
+                station_names = ["Default Station"] # Fallback
+            
+            selected_station_name = st.selectbox("Choose Station to Monitor", station_names)
+            
+            # Get Station Details
+            station_summary = mgr.get_station_summary(selected_station_name)
+            if station_summary:
+                st.write(f"**{selected_station_name}** | Platforms: {station_summary['total_platforms']} | Zone: {station_summary.get('zone', 'N/A')}")
+            
+            st.markdown("---")
+            
+            # 2. Time Control
+            st.markdown("### 2. Time Travel")
+            
+            # Get time range from calculator
+            min_time, max_time = calc.get_time_range()
+            if not min_time:
+                # Fallback if no time data
+                min_time = datetime(2024, 1, 1, 0, 0)
+                max_time = datetime(2024, 1, 1, 23, 59)
+            
+            # Slider
+            min_ts = min_time.timestamp()
+            max_ts = max_time.timestamp()
+            
+            selected_ts = st.slider(
+                "Select Time",
+                min_value=min_ts,
+                max_value=max_ts,
+                value=min_ts,
+                step=60.0, # 1 minute steps
+                format=""
+            )
+            
+            current_dt = datetime.fromtimestamp(selected_ts)
+            st.markdown(f"#### 🕒 Current Time: `{current_dt.strftime('%Y-%m-%d %H:%M')}`")
+            
+            st.markdown("---")
+            
+            # 3. Occupancy Grid View
+            st.markdown("### 3. Track Occupancy Status")
+            
+            # Get occupancy data
+            occupancy = calc.get_occupancy_at_time(selected_station_name, current_dt)
+            
+            # Summary Metrics for this time
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric("Occupied Tracks", occupancy['occupied_count'])
+            with c2:
+                st.metric("Free Tracks", occupancy['free_count'])
+            with c3:
+                utilization = (occupancy['occupied_count'] / occupancy['total_platforms']) * 100 if occupancy['total_platforms'] > 0 else 0
+                st.metric("Utilization", f"{utilization:.1f}%")
+            
+            # Grid Visual
+            # We'll use columns to create a grid layout
+            
+            platforms = occupancy['platforms']
+            # Sort by platform ID
+            sorted_p_ids = sorted(platforms.keys(), key=lambda x: int(x[1:]) if x[1:].isdigit() else x)
+            
+            # Create interactive grid
+            st.markdown("#### Platform Status Grid")
+            
+            # Define CSS for grid
+            st.markdown("""
+            <style>
+            .plat-card {
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                text-align: center;
+                border: 1px solid #333;
+            }
+            .occupied {
+                background-color: #3b2a2a; /* Dark Redish */
+                border-color: #ff4b4b;
+            }
+            .free {
+                background-color: #1a2f1a; /* Dark Greenish */
+                border-color: #00ff88;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Iterate and display
+            cols = st.columns(4) # 4 columns grid
+            for idx, pid in enumerate(sorted_p_ids):
+                p_data = platforms[pid]
+                status = p_data['status']
+                col_idx = idx % 4
+                
+                with cols[col_idx]:
+                    if status == 'OCCUPIED':
+                        card_class = "occupied"
+                        icon = "🔴"
+                        train_txt = f"**{p_data['train_id']}**"
+                        sub_txt = f"Dep: {p_data['departure_time'].strftime('%H:%M') if p_data['departure_time'] else '?'}"
+                    else:
+                        card_class = "free"
+                        icon = "🟢"
+                        train_txt = "*Empty*"
+                        sub_txt = "Available"
+                    
+                    st.markdown(f"""
+                    <div class="plat-card {card_class}">
+                        <h4 style="margin:0">{icon} {pid}</h4>
+                        <p style="font-size:1.2em; margin:5px 0;">{train_txt}</p>
+                        <small>{sub_txt}</small>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            # Detailed Table
+            with st.expander("📝 View Detailed Schedule for this Station"):
+                # Filter schedule for this station
+                # This is a bit computationally expensive if done every rerun on full df, 
+                # but valid for prototype.
+                if 'raw_df' in st.session_state:
+                    df = st.session_state.raw_df
+                    # Simple filter for station name in dep/arr
+                    # This depends on exact column names from analyzer
+                    # Analyzer standardizes to 'departure_station', 'arrival_station'
+                    
+                    station_filter = (df['departure_station'] == selected_station_name) | (df['arrival_station'] == selected_station_name)
+                    st.dataframe(df[station_filter], use_container_width=True)
+
 
 if __name__ == "__main__":
     pass

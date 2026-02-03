@@ -214,30 +214,11 @@ python tests/test_track_manager.py
 python tests/test_digital_twin.py
 ```
 
-### 3. Run Demos
+### 3. Launch Dashboard
 
 ```bash
-# Train simulation demo
-python examples/demo_simulation.py
-
-# ETA prediction demo
-python examples/demo_eta_prediction.py
-
-# Complete integration demo
-python examples/demo_integration.py
-
-# Schedule loader demo
-python examples/demo_schedule_loader.py
-```
-
-### 4. Launch Dashboard
-
-```bash
-# Classic dashboard (Station Master Interface)
+# Launch the Main Dashboard (Premium Control Center)
 streamlit run dashboard/app.py
-
-# Premium dashboard (Modern Control Center)
-streamlit run dashboard/app_premium.py
 ```
 
 ---
@@ -263,6 +244,7 @@ Digital Twin–Based Railway/
 │   │
 │   ├── 📂 railway/               # Railway controllers
 │   │   ├── track_manager.py     # Track occupancy management
+│   │   ├── station_manager.py   # Multi-station manager (NEW)
 │   │   ├── signal_controller.py # Signal control
 │   │   └── gate_controller.py   # Gate control
 │   │
@@ -285,11 +267,12 @@ Digital Twin–Based Railway/
 │   │   └── event_logger.py      # Event logger
 │   │
 │   └── 📂 utils/                 # Utilities
-│       └── train_categorizer.py # Train categorization
+│       ├── train_categorizer.py # Train categorization
+│       └── track_occupancy.py   # Track occupancy calculator (NEW)
 │
 ├── 📂 dashboard/                 # Dashboards
-│   ├── app.py                    # Classic dashboard
-│   ├── app_premium.py            # Premium dashboard (NEW)
+│   ├── app.py                    # Main Premium Dashboard
+│   ├── _archive_app_legacy.py    # Archived Classic Dashboard
 │   └── 📂 components/
 │       └── visual_sim.py         # 2D visualization
 │
