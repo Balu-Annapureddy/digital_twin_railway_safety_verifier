@@ -62,8 +62,8 @@ class SmartDatasetAnalyzer:
     
     # Common column name patterns
     TRAIN_ID_PATTERNS = ['train_id', 'train', 'trainid', 'train_no', 'train_number', 'id']
-    TIMESTAMP_PATTERNS = ['timestamp', 'time', 'datetime', 'date', 'scheduled_time', 'actual_time']
-    STATION_PATTERNS = ['station', 'station_name', 'station_id', 'stop', 'location', 'departure_station', 'arrival_station']
+    TIMESTAMP_PATTERNS = ['timestamp', 'time', 'datetime', 'date', 'scheduled_time', 'actual_time', 'arrival', 'departure', 'arr_time', 'dep_time']
+    STATION_PATTERNS = ['station', 'station_name', 'station_id', 'stop', 'location', 'departure_station', 'arrival_station', 'source', 'destination']
     LATITUDE_PATTERNS = ['lat', 'latitude', 'y']
     LONGITUDE_PATTERNS = ['lon', 'lng', 'longitude', 'x']
     SPEED_PATTERNS = ['speed', 'velocity', 'kmph', 'mph']
@@ -164,15 +164,32 @@ class SmartDatasetAnalyzer:
                 break
         
         # Detect timestamp column
+        # First pass: Look for explicit datetime objects or parseable explicit timestamp columns
         for col in df.columns:
-            if any(pattern in columns_lower[col] for pattern in self.TIMESTAMP_PATTERNS):
-                # Verify it's actually a datetime
-                try:
-                    pd.to_datetime(df[col].dropna().iloc[0] if not df[col].dropna().empty else None)
-                    self.result.timestamp_column = col
-                    break
-                except:
-                    continue
+            col_cleaned = columns_lower[col]
+            if any(pattern in col_cleaned for pattern in self.TIMESTAMP_PATTERNS):
+                # Verify it's actually or potentially a datetime
+                sample_val = df[col].dropna().iloc[0] if not df[col].dropna().empty else None
+                if sample_val:
+                    try:
+                        # Try parsing directly
+                        pd.to_datetime(sample_val)
+                        self.result.timestamp_column = col
+                        break
+                    except:
+                        # If simple parse fails, check if we have a separate 'Day' column to combine with
+                        # e.g. '07:55:00' fails pd.to_datetime strict, but might work if we interpret as time
+                        # or if we have Day column.
+                        if 'day' in columns_lower:
+                            # Heuristic: if we have time-like string and a day column, accept it
+                             if isinstance(sample_val, str) and ':' in sample_val:
+                                 self.result.timestamp_column = col
+                                 break
+                        # Allow partial time strings (HH:MM:SS) as 'timestamp' for now, DataTransformer will handle combination
+                        if isinstance(sample_val, str) and ':' in sample_val:
+                             self.result.timestamp_column = col
+                             break
+                        continue
         
         # Detect station column
         for col, col_lower in columns_lower.items():
@@ -258,9 +275,36 @@ class SmartDatasetAnalyzer:
         """Extract time range from dataset."""
         if self.result.timestamp_column:
             try:
-                df_time = pd.to_datetime(df[self.result.timestamp_column], errors='coerce')
-                self.result.start_time = df_time.min()
-                self.result.end_time = df_time.max()
+                # OPTIMIZATION: Infer format from the first valid value to avoid per-row crawling
+                sample_val = df[self.result.timestamp_column].dropna().astype(str).iloc[0]
+                
+                # Check if it's just a time string (e.g. "07:55:00") - simple check
+                is_time_only = False
+                if ' ' not in sample_val and ':' in sample_val and len(sample_val) < 15:
+                     is_time_only = True
+
+                if is_time_only:
+                     # For time-only, we can't really get a "date" range, but we can parse it for min/max time
+                     # Use a fixed format if possible or let pandas handle it quickly as timedelta or dummy date
+                     df_time = pd.to_datetime(df[self.result.timestamp_column], format='%H:%M:%S', errors='coerce')
+                     if df_time.isnull().all():
+                          # Try without format if strict failed
+                          df_time = pd.to_datetime(df[self.result.timestamp_column], errors='coerce')
+                else:
+                    # Try to guess format from sample (basic heuristics) or use 'mixed' only if needed
+                    # 'iso8601' is fast if applicable
+                    try:
+                        df_time = pd.to_datetime(df[self.result.timestamp_column], format='ISO8601', errors='coerce')
+                    except:
+                        # Fallback to mixed/infer but try to avoid pure retry
+                        try:
+                             df_time = pd.to_datetime(df[self.result.timestamp_column], errors='coerce', format='mixed')
+                        except (TypeError, ValueError):
+                             df_time = pd.to_datetime(df[self.result.timestamp_column], errors='coerce')
+                
+                if not df_time.isnull().all():
+                    self.result.start_time = df_time.min()
+                    self.result.end_time = df_time.max()
             except Exception as e:
                 self.result.warnings.append(f"Could not parse timestamps: {str(e)}")
     

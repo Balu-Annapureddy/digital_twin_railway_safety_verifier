@@ -15,20 +15,23 @@ pip install -r requirements.txt
 ### 2. Launch Premium Dashboard
 
 ```bash
-# Run the new premium dashboard
-streamlit run dashboard/app_premium.py
+# Run the premium dashboard
+streamlit run dashboard/app.py
 ```
 
-### 3. Upload Your Dataset
+**🎉 The dashboard will automatically load the primary dataset (`data/schedules.json/schedules.json`) on startup!**
 
-The system supports:
-- ✅ **CSV files** - Train schedules, logs, tracking data
-- ✅ **JSON files** - Network topology, structured data
-- ✅ **Excel files** - Any railway operational data
+### 3. Dataset Information
 
-**Sample datasets included:**
-- `data/sample_indian_railways.csv` - Train schedule data
-- `data/sample_network_topology.json` - Network structure
+The system **automatically loads** the primary dataset on startup:
+- ✅ **Primary Dataset**: `data/schedules.json/schedules.json` (Auto-loaded)
+- ✅ **Cached Processing**: First load may take 30-60 seconds, subsequent loads are instant
+- ✅ **Adaptive Analysis**: Works with any railway dataset format
+
+**You can also upload additional datasets:**
+- CSV files - Train schedules, logs, tracking data
+- JSON files - Network topology, structured data
+- Excel files - Any railway operational data
 
 ### 4. Explore Features
 

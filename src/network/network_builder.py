@@ -195,13 +195,29 @@ class NetworkBuilder:
     
     def get_network_stats(self) -> Dict:
         """Get network statistics."""
-        return {
+        stats = {
             'total_stations': len(self.stations),
             'total_routes': len(self.routes),
             'total_connections': self.graph.number_of_edges(),
-            'network_diameter': nx.diameter(self.graph) if nx.is_connected(self.graph) else 0,
-            'average_degree': sum(dict(self.graph.degree()).values()) / len(self.graph.nodes()) if len(self.graph.nodes()) > 0 else 0
+            'network_diameter': 0, # Default safe value
+            'average_degree': 0.0
         }
+        
+        # Safely calculate complex stats
+        if len(self.graph.nodes()) > 0:
+             try:
+                 stats['average_degree'] = sum(dict(self.graph.degree()).values()) / len(self.graph.nodes())
+             except:
+                 pass
+                 
+             try:
+                 if nx.is_connected(self.graph):
+                     stats['network_diameter'] = nx.diameter(self.graph)
+             except (nx.NetworkXError, nx.NetworkXPointlessConcept, Exception):
+                 # Graph might be null or not connected enough despite check
+                 pass
+                 
+        return stats
     
     def get_shortest_path(self, from_station: str, to_station: str) -> List[str]:
         """

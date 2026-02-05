@@ -104,9 +104,37 @@ class DataTransformer:
                         'train_id': train_id,
                         'event_type': 'ARRIVAL',
                         'station': row[self.analysis.station_column] if self.analysis.station_column else None,
-                        'timestamp': pd.to_datetime(row[self.analysis.timestamp_column]) if self.analysis.timestamp_column else None,
+                        'station': row[self.analysis.station_column] if self.analysis.station_column else None,
                         'status': row[self.analysis.status_column] if self.analysis.status_column else 'UNKNOWN'
                     }
+                    
+                    # Smart Timestamp Parsing
+                    if self.analysis.timestamp_column:
+                         raw_time = row[self.analysis.timestamp_column]
+                         # Check if we have a Day column to combine with
+                         has_day = False
+                         for col in df.columns:
+                             if 'day' in col.lower():
+                                 val = row[col]
+                                 try:
+                                     # Convert Day 1 to 2024-01-01, Day 2 to 2024-01-02 etc.
+                                     day_offset = int(val) - 1
+                                     base_date = datetime(2024, 1, 1) # Default epoch for simulation
+                                     date_part = base_date + pd.Timedelta(days=day_offset)
+                                     
+                                     # Parse time part
+                                     time_part = pd.to_datetime(str(raw_time), format='%H:%M:%S', errors='coerce').time()
+                                     if time_part:
+                                          event['timestamp'] = datetime.combine(date_part.date(), time_part)
+                                          has_day = True
+                                 except:
+                                     pass
+                                 break
+                         
+                         if not has_day:
+                             event['timestamp'] = pd.to_datetime(raw_time, errors='coerce')
+                    else:
+                        event['timestamp'] = None
                     events_data.append(event)
                     
                     if self.analysis.station_column:
